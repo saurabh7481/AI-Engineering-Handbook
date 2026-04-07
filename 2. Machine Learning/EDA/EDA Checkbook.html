@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exhaustive EDA Guidebook — ML Engineers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,500;0,700;1,300;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e2a;
+    --surface: #1f2435;
+    --surface2: #252b3b;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf2;
+    --text2: #9ba3bf;
+    --text3: #6b7498;
+    --accent: #5b8ef7;
+    --accent2: #7c6ef5;
+    --green: #3ecf8e;
+    --amber: #f5a623;
+    --red: #e05252;
+    --teal: #2fc4b2;
+    --pink: #e879a0;
+    --font-head: 'Fraunces', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-code: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 280px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface2) transparent;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .label {
+    font-family: var(--font-code);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .sidebar nav { padding: 16px 0; }
+
+  .nav-section {
+    font-family: var(--font-code);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 14px 24px 6px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 7px 24px;
+    font-size: 13px;
+    color: var(--text2);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    font-weight: 400;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--text);
+    background: rgba(91,142,247,0.08);
+    border-left-color: var(--accent);
+  }
+
+  .nav-item span.num {
+    font-family: var(--font-code);
+    font-size: 10px;
+    color: var(--text3);
+    margin-right: 8px;
+  }
+
+  /* ── Main content ── */
+  .main { flex: 1; min-width: 0; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0d0f14 0%, #111523 50%, #0f1320 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 64px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(91,142,247,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: 200px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,110,245,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(91,142,247,0.1);
+    border: 1px solid rgba(91,142,247,0.25);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 28px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero h1 {
+    font-family: var(--font-head);
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text2);
+    font-weight: 300;
+    margin-bottom: 32px;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hero-meta-item .val {
+    font-family: var(--font-code);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .hero-meta-item .key {
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Dataset callout ── */
+  .dataset-callout {
+    margin: 40px 64px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--green);
+    border-radius: 12px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .dataset-icon {
+    width: 44px; height: 44px;
+    background: rgba(62,207,142,0.12);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .dataset-callout h3 {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+
+  .dataset-callout p { color: var(--text2); font-size: 14px; margin-bottom: 10px; }
+
+  .dataset-links { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .dataset-links a {
+    font-family: var(--font-code);
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    background: rgba(91,142,247,0.1);
+    border: 1px solid rgba(91,142,247,0.2);
+    border-radius: 6px;
+    padding: 4px 12px;
+  }
+
+  .dataset-links a:hover { background: rgba(91,142,247,0.2); }
+
+  /* ── Section ── */
+  .section {
+    padding: 56px 64px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  .section-num {
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(91,142,247,0.1);
+    border: 1px solid rgba(91,142,247,0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .section-desc {
+    color: var(--text2);
+    font-size: 15px;
+    margin-top: 10px;
+    max-width: 700px;
+    line-height: 1.7;
+  }
+
+  /* ── Concept boxes ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    transition: border-color 0.2s;
+  }
+
+  .concept-card:hover { border-color: var(--border2); }
+
+  .concept-card .cc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .concept-card .cc-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .concept-card h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: var(--font-code);
+  }
+
+  .concept-card p {
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 24px 0;
+    font-family: var(--font-code);
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-header .lang {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .code-header .filename {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .code-body {
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text);
+    white-space: pre;
+  }
+
+  /* Syntax highlighting */
+  .kw { color: #a78bfa; font-weight: 600; }
+  .fn { color: #60d0f5; }
+  .st { color: #86efac; }
+  .cm { color: var(--text3); font-style: italic; }
+  .num { color: var(--amber); }
+  .cls { color: #fbbf24; }
+  .dec { color: var(--pink); }
+  .op { color: var(--text2); }
+  .im { color: #f97316; }
+
+  /* ── Method table ── */
+  .method-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13.5px;
+  }
+
+  .method-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--surface);
+    color: var(--text3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-code);
+    font-weight: 400;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .method-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .method-table tr:hover td { background: var(--bg3); }
+
+  .method-table td:first-child {
+    font-family: var(--font-code);
+    font-size: 12.5px;
+    color: var(--teal);
+    white-space: nowrap;
+  }
+
+  .method-table td .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--font-code);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .tag-num { background: rgba(91,142,247,0.15); color: var(--accent); }
+  .tag-cat { background: rgba(245,166,35,0.15); color: var(--amber); }
+  .tag-both { background: rgba(62,207,142,0.15); color: var(--green); }
+  .tag-time { background: rgba(232,121,160,0.15); color: var(--pink); }
+  .tag-geo { background: rgba(47,196,178,0.15); color: var(--teal); }
+
+  /* ── Alert boxes ── */
+  .alert {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 14px;
+  }
+
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-body { color: var(--text2); line-height: 1.65; }
+  .alert-body strong { color: var(--text); font-weight: 500; }
+
+  .alert-warning { background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.2); }
+  .alert-info { background: rgba(91,142,247,0.08); border: 1px solid rgba(91,142,247,0.2); }
+  .alert-success { background: rgba(62,207,142,0.08); border: 1px solid rgba(62,207,142,0.2); }
+  .alert-danger { background: rgba(224,82,82,0.08); border: 1px solid rgba(224,82,82,0.2); }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 20px 0; }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text2);
+  }
+
+  .checklist li::before {
+    content: '';
+    width: 18px; height: 18px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--surface);
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+
+  .stat-card .sv { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--text); }
+  .stat-card .sk { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  /* ── Flow diagram (CSS-only) ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 24px 0;
+    overflow-x: auto;
+    padding: 16px 0;
+  }
+
+  .flow-step {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-family: var(--font-code);
+    color: var(--text2);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .flow-step::after {
+    content: '→';
+    position: absolute;
+    right: -20px;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  .flow-step:last-child::after { display: none; }
+
+  .flow-arrow { width: 32px; display: flex; justify-content: center; color: var(--text3); font-size: 16px; }
+
+  /* ── Viz placeholder ── */
+  .viz-placeholder {
+    background: var(--bg3);
+    border: 1px dashed var(--border2);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    margin: 20px 0;
+    color: var(--text3);
+    font-family: var(--font-code);
+    font-size: 13px;
+  }
+
+  .viz-placeholder .vp-title {
+    font-size: 15px;
+    color: var(--text2);
+    margin-bottom: 8px;
+    font-family: var(--font-body);
+    font-weight: 500;
+  }
+
+  /* ── Interpretation box ── */
+  .interp-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+
+  .interp-box h5 {
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+
+  .interp-box ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .interp-box li {
+    font-size: 13.5px;
+    color: var(--text2);
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .interp-box li::before { content: '→'; position: absolute; left: 0; color: var(--text3); }
+
+  /* ── Pill tags ── */
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .pill {
+    font-family: var(--font-code);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+
+  .pill-blue { color: var(--accent); border-color: rgba(91,142,247,0.3); background: rgba(91,142,247,0.08); }
+  .pill-green { color: var(--green); border-color: rgba(62,207,142,0.3); background: rgba(62,207,142,0.08); }
+  .pill-amber { color: var(--amber); border-color: rgba(245,166,35,0.3); background: rgba(245,166,35,0.08); }
+  .pill-pink { color: var(--pink); border-color: rgba(232,121,160,0.3); background: rgba(232,121,160,0.08); }
+  .pill-teal { color: var(--teal); border-color: rgba(47,196,178,0.3); background: rgba(47,196,178,0.08); }
+
+  /* ── H2, H3 ── */
+  h2.sub {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 36px 0 14px;
+  }
+
+  h3.sub {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 24px 0 10px;
+    font-family: var(--font-code);
+    color: var(--teal);
+  }
+
+  p.body { color: var(--text2); margin-bottom: 14px; font-size: 14.5px; }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── Final checklist ── */
+  .mega-checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 28px 0;
+  }
+
+  .check-group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+
+  .check-group h4 {
+    font-family: var(--font-code);
+    font-size: 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .check-group ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+
+  .check-group li {
+    font-size: 13px;
+    color: var(--text2);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .check-group li span.cb {
+    width: 14px; height: 14px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--bg3);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 40px 64px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer p { font-size: 13px; color: var(--text3); }
+  .footer .footer-badge {
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(91,142,247,0.1);
+    border: 1px solid rgba(91,142,247,0.2);
+    border-radius: 100px;
+    padding: 5px 14px;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="label">ML Engineering</div>
+    <h2>EDA<br>Guidebook</h2>
+  </div>
+  <nav>
+    <div class="nav-section">Foundations</div>
+    <a class="nav-item" href="#s0"><span class="num">00</span>Environment Setup</a>
+    <a class="nav-item" href="#s1"><span class="num">01</span>Data Ingestion</a>
+    <a class="nav-item" href="#s2"><span class="num">02</span>Basic Statistics</a>
+    <a class="nav-item" href="#s3"><span class="num">03</span>Missing Values</a>
+
+    <div class="nav-section">Core Analysis</div>
+    <a class="nav-item" href="#s4"><span class="num">04</span>Univariate Analysis</a>
+    <a class="nav-item" href="#s5"><span class="num">05</span>Bivariate Analysis</a>
+    <a class="nav-item" href="#s6"><span class="num">06</span>Multivariate Analysis</a>
+    <a class="nav-item" href="#s7"><span class="num">07</span>Outlier Detection</a>
+
+    <div class="nav-section">Specialized</div>
+    <a class="nav-item" href="#s8"><span class="num">08</span>Time Series EDA</a>
+    <a class="nav-item" href="#s9"><span class="num">09</span>Geospatial EDA</a>
+    <a class="nav-item" href="#s10"><span class="num">10</span>Target Analysis</a>
+    <a class="nav-item" href="#s11"><span class="num">11</span>Data Quality Audit</a>
+
+    <div class="nav-section">Advanced</div>
+    <a class="nav-item" href="#s12"><span class="num">12</span>Automated Profiling</a>
+    <a class="nav-item" href="#s13"><span class="num">13</span>Imbalanced Data</a>
+    <a class="nav-item" href="#s14"><span class="num">14</span>Full Pipeline</a>
+    <a class="nav-item" href="#s15"><span class="num">15</span>EDA Checklist</a>
+  </nav>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main">
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-badge">Production-grade EDA Reference — v2025</div>
+  <h1>Exhaustive <em>EDA</em><br>for ML Engineers</h1>
+  <p class="hero-sub">A complete industrial-scale playbook for exploratory data analysis. Covers every stage from raw ingestion to feature insights — using modern Python tooling.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span class="val">15</span><span class="key">Modules</span></div>
+    <div class="hero-meta-item"><span class="val">2000+</span><span class="key">Lines of Code</span></div>
+    <div class="hero-meta-item"><span class="val">40+</span><span class="key">Analysis Methods</span></div>
+    <div class="hero-meta-item"><span class="val">3M+</span><span class="key">Row Example Dataset</span></div>
+  </div>
+</section>
+
+<!-- ── Dataset callout ── -->
+<div class="dataset-callout">
+  <div class="dataset-icon">🗽</div>
+  <div>
+    <h3>Example Dataset: NYC Yellow Taxi Trip Records (Jan 2023)</h3>
+    <p>All code examples in this guide use the NYC Taxi dataset — a real, messy, industrial-scale dataset with ~3.1M rows, geospatial data, timestamps, mixed distributions, and quality issues. Perfect for learning EDA on production data.</p>
+    <div class="dataset-links">
+      <a href="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet" target="_blank">Download Parquet ↗</a>
+      <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page" target="_blank">TLC Data Portal ↗</a>
+      <a href="https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv" target="_blank">Titanic (Classification) ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     00 — ENVIRONMENT SETUP
+═════════════════════════════════════════════════ -->
+<section class="section" id="s0">
+  <div class="section-header">
+    <div class="section-num">00</div>
+    <div>
+      <div class="section-title">Environment Setup</div>
+      <div class="section-desc">Choose modern tooling. Polars is 5–20× faster than pandas for large datasets, uses Apache Arrow memory format, and supports lazy evaluation. Plotly produces interactive charts natively.</div>
+    </div>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--accent)"></div><h4>polars</h4></div>
+      <p>Rust-based DataFrame library. LazyFrame API applies predicate/projection pushdown. Use for any dataset over 100K rows. Full Pandas compatibility via <code>.to_pandas()</code>.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--pink)"></div><h4>plotly</h4></div>
+      <p>Interactive, publication-quality charts. Exports to HTML, PNG, SVG. Supports scatter, box, violin, heatmap, 3D, geographic, and custom charts natively.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--green)"></div><h4>ydata-profiling</h4></div>
+      <p>One-line automated EDA report with distributions, correlations, missing values, and interactions. Best for initial exploration before custom analysis.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--amber)"></div><h4>scipy + statsmodels</h4></div>
+      <p>Statistical tests (normality, ANOVA, chi-square), seasonal decomposition, ACF/PACF, VIF. Essential for rigorous statistical reasoning.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--teal)"></div><h4>scikit-learn</h4></div>
+      <p>PCA, t-SNE, Isolation Forest, mutual information, feature importance, StandardScaler. The ML glue for dimensionality reduction and anomaly detection.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--accent2)"></div><h4>missingno</h4></div>
+      <p>Matrix, bar, and heatmap visualizations of missing data patterns. Reveals whether missingness is MCAR, MAR, or MNAR at a glance.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><span class="filename">install.sh</span></div>
+    <div class="code-body"><span class="cm"># Core modern stack</span>
+pip install polars plotly kaleido pyarrow
+
+<span class="cm"># Statistical & ML</span>
+pip install scipy statsmodels scikit-learn umap-learn
+
+<span class="cm"># Quality & profiling</span>
+pip install ydata-profiling missingno fastparquet
+
+<span class="cm"># Optional but recommended</span>
+pip install seaborn matplotlib pandas</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">setup.py</span></div>
+    <div class="code-body"><span class="kw">import</span> <span class="im">polars</span> <span class="kw">as</span> pl
+<span class="kw">import</span> <span class="im">polars.selectors</span> <span class="kw">as</span> cs
+<span class="kw">import</span> <span class="im">pandas</span> <span class="kw">as</span> pd
+<span class="kw">import</span> <span class="im">numpy</span> <span class="kw">as</span> np
+
+<span class="kw">import</span> <span class="im">plotly.express</span> <span class="kw">as</span> px
+<span class="kw">import</span> <span class="im">plotly.graph_objects</span> <span class="kw">as</span> go
+<span class="kw">from</span> <span class="im">plotly.subplots</span> <span class="kw">import</span> make_subplots
+<span class="kw">import</span> <span class="im">plotly.io</span> <span class="kw">as</span> pio
+pio.templates.default = <span class="st">"plotly_white"</span>
+
+<span class="kw">from</span> <span class="im">scipy</span> <span class="kw">import</span> stats
+<span class="kw">from</span> <span class="im">sklearn.decomposition</span> <span class="kw">import</span> PCA
+<span class="kw">from</span> <span class="im">sklearn.ensemble</span> <span class="kw">import</span> IsolationForest
+<span class="kw">import</span> <span class="im">statsmodels.api</span> <span class="kw">as</span> sm
+<span class="kw">import</span> <span class="im">missingno</span> <span class="kw">as</span> msno</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     01 — DATA INGESTION
+═════════════════════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-title">Data Ingestion & Initial Inspection</div>
+      <div class="section-desc">How you load data matters at scale. A 10GB CSV file loaded naively with pandas will use 50GB of RAM. Use Polars LazyFrame for query optimization before materializing.</div>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <div class="alert-icon">💡</div>
+    <div class="alert-body"><strong>The LazyFrame Principle:</strong> With Polars, always use <code>scan_parquet()</code> or <code>scan_csv()</code> first (LazyFrame). Add your filters, selects, and aggregations before calling <code>.collect()</code>. Polars' query optimizer can push predicates down and avoid loading unnecessary data.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">ingestion.py</span></div>
+    <div class="code-body"><span class="cm"># ── LAZY loading (preferred for large files) ──</span>
+lf = pl.scan_parquet(<span class="st">"data.parquet"</span>)
+
+<span class="cm"># Only loads columns you need — massive memory saving</span>
+df = (lf
+      .filter(pl.col(<span class="st">"fare_amount"</span>) > <span class="num">0</span>)
+      .select([<span class="st">"trip_distance"</span>, <span class="st">"fare_amount"</span>, <span class="st">"tpep_pickup_datetime"</span>])
+      .collect())  <span class="cm"># ← executes here</span>
+
+<span class="cm"># ── For HTTP URLs (via pandas → polars) ──</span>
+URL = <span class="st">"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet"</span>
+pdf = pd.read_parquet(URL, engine=<span class="st">'pyarrow'</span>)
+df = pl.from_pandas(pdf)
+
+<span class="cm"># ── Quick vitals — run these FIRST on any new dataset ──</span>
+<span class="fn">print</span>(df.shape)           <span class="cm"># (rows, cols)</span>
+<span class="fn">print</span>(df.schema)          <span class="cm"># dtype of every column</span>
+<span class="fn">print</span>(df.head(<span class="num">5</span>))         <span class="cm"># first 5 rows</span>
+<span class="fn">print</span>(df.estimated_size() / <span class="num">1024</span>**<span class="num">2</span>, <span class="st">"MB"</span>)  <span class="cm"># memory usage</span>
+
+<span class="cm"># ── Schema with null counts ──</span>
+<span class="kw">for</span> col <span class="kw">in</span> df.schema:
+    null_pct = df[col].null_count() / df.height * <span class="num">100</span>
+    <span class="fn">print</span>(<span class="st">f"  {col:&lt;35} {str(df.schema[col]):&lt;20} nulls={null_pct:.1f}%"</span>)
+
+<span class="cm"># ── Cardinality (unique values per column) ──</span>
+<span class="kw">for</span> col <span class="kw">in</span> df.columns:
+    <span class="fn">print</span>(<span class="st">f"{col}: {df[col].n_unique()} unique values"</span>)
+
+<span class="cm"># ── Detect column semantic types ──</span>
+<span class="kw">for</span> col <span class="kw">in</span> df.columns:
+    n_unique = df[col].n_unique()
+    <span class="kw">if</span> n_unique == <span class="num">2</span>:
+        <span class="fn">print</span>(<span class="st">f"{col} → BINARY"</span>)
+    <span class="kw">elif</span> df[col].dtype == pl.Utf8 <span class="kw">and</span> n_unique > df.height * <span class="num">0.5</span>:
+        <span class="fn">print</span>(<span class="st">f"{col} → ID/HIGH-CARDINALITY STRING"</span>)
+    <span class="kw">elif</span> n_unique &lt;= <span class="num">20</span>:
+        <span class="fn">print</span>(<span class="st">f"{col} → CATEGORICAL ({n_unique} levels)"</span>)</div>
+  </div>
+
+  <div class="interp-box">
+    <h5>What to look for in the NYC Taxi Schema</h5>
+    <ul>
+      <li><strong>tpep_pickup_datetime</strong>: Datetime col → extract temporal features (hour, weekday, month)</li>
+      <li><strong>PULocationID / DOLocationID</strong>: Integer with ~265 unique values → categorical (zone IDs, not continuous numbers)</li>
+      <li><strong>payment_type</strong>: Integer 1-6 → categorical (1=credit card, 2=cash, 3=no charge...)</li>
+      <li><strong>passenger_count</strong>: Low cardinality integer → treat as categorical or ordinal</li>
+      <li><strong>fare_amount</strong>: Continuous → will need outlier analysis (can be negative!)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     02 — BASIC STATISTICS
+═════════════════════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-title">Basic Dataset Statistics</div>
+      <div class="section-desc">The vital signs of your dataset. Run these before any visualization. Numbers first, then charts.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">basic_stats.py</span></div>
+    <div class="code-body"><span class="cm"># ── Polars describe() — covers all stats in one call ──</span>
+stats_df = df.describe()
+<span class="cm"># Includes: count, null_count, mean, std, min, 25%, 50%, 75%, max</span>
+
+<span class="cm"># ── Five-number + extended summary for one column ──</span>
+<span class="kw">def</span> <span class="fn">extended_summary</span>(df: pl.DataFrame, col: str) -> dict:
+    vals = df[col].drop_nulls().to_numpy()
+    <span class="kw">return</span> {
+        <span class="st">"mean"</span>:     np.mean(vals),
+        <span class="st">"median"</span>:   np.median(vals),
+        <span class="st">"std"</span>:      np.std(vals),
+        <span class="st">"IQR"</span>:      np.percentile(vals, <span class="num">75</span>) - np.percentile(vals, <span class="num">25</span>),
+        <span class="st">"skewness"</span>: stats.skew(vals),   <span class="cm"># >0 right-skewed, &lt;0 left-skewed</span>
+        <span class="st">"kurtosis"</span>: stats.kurtosis(vals), <span class="cm"># >0 heavy tails (leptokurtic)</span>
+        <span class="st">"CV"</span>:       np.std(vals) / np.mean(vals),  <span class="cm"># coefficient of variation</span>
+    }
+
+<span class="cm"># ── Cardinality report using Polars expressions ──</span>
+cardinality = pl.DataFrame({
+    <span class="st">"column"</span>: df.columns,
+    <span class="st">"dtype"</span>: [str(df[c].dtype) <span class="kw">for</span> c <span class="kw">in</span> df.columns],
+    <span class="st">"n_unique"</span>: [df[c].n_unique() <span class="kw">for</span> c <span class="kw">in</span> df.columns],
+    <span class="st">"null_pct"</span>: [round(df[c].null_count() / df.height * <span class="num">100</span>, <span class="num">2</span>) <span class="kw">for</span> c <span class="kw">in</span> df.columns]
+}).sort(<span class="st">"n_unique"</span>, descending=<span class="kw">True</span>)</div>
+  </div>
+
+  <h2 class="sub">Interpreting Skewness & Kurtosis</h2>
+  <table class="method-table">
+    <thead><tr><th>Metric</th><th>Value Range</th><th>Interpretation</th><th>Recommended Action</th></tr></thead>
+    <tbody>
+      <tr><td>Skewness</td><td>−0.5 to 0.5</td><td>Approximately symmetric</td><td>No transformation needed</td></tr>
+      <tr><td>Skewness</td><td>> 1.0 (positive)</td><td>Right-skewed (long right tail)</td><td>Log transform: <code>np.log1p()</code></td></tr>
+      <tr><td>Skewness</td><td>&lt; −1.0 (negative)</td><td>Left-skewed (long left tail)</td><td>Square or exponential transform</td></tr>
+      <tr><td>Kurtosis</td><td>> 3 (leptokurtic)</td><td>Heavy tails, extreme outliers likely</td><td>Robust scaling, outlier treatment</td></tr>
+      <tr><td>Kurtosis</td><td>&lt; 3 (platykurtic)</td><td>Light tails, uniform-ish</td><td>Check for bounded distributions</td></tr>
+      <tr><td>CV</td><td>> 1.0</td><td>High relative variation</td><td>Normalize before modeling</td></tr>
+      <tr><td>CV</td><td>&lt; 0.1</td><td>Very low variation</td><td>Check for near-zero-variance features</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-warning">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-body"><strong>NYC Taxi insight:</strong> <code>fare_amount</code> has skewness ≈ 5.2 (heavily right-skewed). <code>trip_distance</code> similarly skewed. <code>tip_amount</code> has a massive spike at 0 (cash trips have no tip recorded) — this creates a bimodal distribution that standard summary stats will miss completely.</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     03 — MISSING VALUES
+═════════════════════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-title">Missing Value Analysis</div>
+      <div class="section-desc">Missing data is never truly "missing" — it carries information. The pattern of missingness tells a story. Before imputing, understand why values are absent.</div>
+    </div>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--green)"></div><h4>MCAR — Missing Completely At Random</h4></div>
+      <p>Missingness is independent of any variable. A random sensor failure. <strong>Strategy:</strong> Listwise deletion is valid. Simple imputation (mean/median) works. Little's MCAR test: p &gt; 0.05.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--amber)"></div><h4>MAR — Missing At Random</h4></div>
+      <p>Missingness depends on other observed variables. Survey non-response correlated with age. <strong>Strategy:</strong> Multiple imputation (MICE), model-based imputation, KNN imputation.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--red)"></div><h4>MNAR — Missing Not At Random</h4></div>
+      <p>Missingness depends on the unobserved value itself. High earners skip income questions. <strong>Strategy:</strong> Domain-specific logic, add "is_missing" indicator feature, sensitivity analysis.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">missing_values.py</span></div>
+    <div class="code-body"><span class="cm"># ── Missing summary with Polars ──</span>
+missing_summary = pl.DataFrame({
+    <span class="st">"column"</span>: df.columns,
+    <span class="st">"missing_count"</span>: [df[c].null_count() <span class="kw">for</span> c <span class="kw">in</span> df.columns],
+    <span class="st">"missing_pct"</span>: [round(df[c].null_count() / df.height * <span class="num">100</span>, <span class="num">2</span>) <span class="kw">for</span> c <span class="kw">in</span> df.columns],
+}).filter(pl.col(<span class="st">"missing_count"</span>) > <span class="num">0</span>).sort(<span class="st">"missing_pct"</span>, descending=<span class="kw">True</span>)
+
+<span class="cm"># ── Interactive bar chart of missing percentages ──</span>
+miss_pd = missing_summary.to_pandas()
+fig = px.bar(miss_pd, x=<span class="st">"column"</span>, y=<span class="st">"missing_pct"</span>,
+             title=<span class="st">"Missing Value Percentage by Column"</span>,
+             color=<span class="st">"missing_pct"</span>, color_continuous_scale=<span class="st">"Reds"</span>,
+             text=<span class="st">"missing_pct"</span>)
+fig.update_traces(texttemplate=<span class="st">'%{text:.1f}%'</span>, textposition=<span class="st">'outside'</span>)
+
+<span class="cm"># ── missingno matrix: visual pattern analysis ──</span>
+pdf_sample = df.sample(<span class="num">5000</span>, seed=<span class="num">42</span>).to_pandas()
+cols_with_missing = [c <span class="kw">for</span> c <span class="kw">in</span> pdf_sample.columns <span class="kw">if</span> pdf_sample[c].isna().any()]
+msno.matrix(pdf_sample[cols_with_missing], figsize=(<span class="num">12</span>, <span class="num">6</span>))
+<span class="cm"># White = present, dark = missing</span>
+<span class="cm"># Vertical alignment of dark patches → correlated missingness (MAR/MNAR)</span>
+
+<span class="cm"># ── Missingness correlation heatmap ──</span>
+miss_indicators = pdf_sample.isna().astype(<span class="fn">int</span>)
+corr = miss_indicators[cols_with_missing].corr()
+fig_corr = px.imshow(corr, title=<span class="st">"Missing Value Correlation"</span>,
+                     color_continuous_scale=<span class="st">"RdBu_r"</span>, zmin=-<span class="num">1</span>, zmax=<span class="num">1</span>)
+
+<span class="cm"># ── Add missing indicator features (MNAR strategy) ──</span>
+<span class="kw">for</span> col <span class="kw">in</span> cols_with_missing:
+    df = df.with_columns(
+        pl.col(col).is_null().cast(pl.Int8).alias(<span class="st">f"{col}_is_missing"</span>)
+    )
+
+<span class="cm"># ── Imputation strategies in Polars ──</span>
+df_imputed = df.with_columns([
+    pl.col(<span class="st">"passenger_count"</span>).fill_null(pl.col(<span class="st">"passenger_count"</span>).median()),
+    pl.col(<span class="st">"store_and_fwd_flag"</span>).fill_null(<span class="st">"N"</span>),  <span class="cm"># categorical: mode</span>
+    pl.col(<span class="st">"congestion_surcharge"</span>).fill_null(<span class="num">0</span>),   <span class="cm"># domain knowledge</span>
+])</div>
+  </div>
+
+  <h2 class="sub">Imputation Decision Tree</h2>
+  <table class="method-table">
+    <thead><tr><th>Missing %</th><th>Type</th><th>Recommended Strategy</th></tr></thead>
+    <tbody>
+      <tr><td>&lt; 5%</td><td>MCAR</td><td>Simple imputation (mean/median/mode) or deletion</td></tr>
+      <tr><td>5–30%</td><td>MAR</td><td>MICE (Multiple Imputation by Chained Equations), KNN, model-based</td></tr>
+      <tr><td>30–60%</td><td>Any</td><td>Add <code>is_missing</code> indicator, impute cautiously, validate with sensitivity analysis</td></tr>
+      <tr><td>&gt; 60%</td><td>Any</td><td>Consider dropping column, or domain-specific constant (0, "unknown")</td></tr>
+      <tr><td>Any</td><td>MNAR</td><td>Add indicator feature, domain logic, consult data owners</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     04 — UNIVARIATE
+═════════════════════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-title">Univariate Analysis</div>
+      <div class="section-desc">Analyze each variable in isolation. Goal: understand the shape, spread, center, and tail behavior of every feature before considering interactions.</div>
+    </div>
+  </div>
+
+  <h2 class="sub">Numerical Features</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">univariate_numerical.py</span></div>
+    <div class="code-body"><span class="cm"># ── Distribution panel: histograms for all numeric columns ──</span>
+num_cols = [<span class="st">'trip_distance'</span>, <span class="st">'fare_amount'</span>, <span class="st">'tip_amount'</span>, <span class="st">'total_amount'</span>]
+nrows, ncols = (<span class="fn">len</span>(num_cols) + <span class="num">2</span>) // <span class="num">3</span>, <span class="num">3</span>
+fig = make_subplots(rows=nrows, cols=ncols, subplot_titles=num_cols)
+
+<span class="kw">for</span> i, col <span class="kw">in</span> <span class="fn">enumerate</span>(num_cols):
+    row, c = i // ncols + <span class="num">1</span>, i % ncols + <span class="num">1</span>
+    data = df[col].drop_nulls().to_numpy()
+    <span class="cm"># Cap at 99.9th percentile to avoid outlier-driven scale compression</span>
+    p999 = np.percentile(data, <span class="num">99.9</span>)
+    p001 = np.percentile(data, <span class="num">0.1</span>)
+    data_clipped = data[(data >= p001) & (data &lt;= p999)]
+    fig.add_trace(go.Histogram(x=data_clipped, nbinsx=<span class="num">60</span>, opacity=<span class="num">0.8</span>,
+                               showlegend=<span class="kw">False</span>), row=row, col=c)
+
+fig.update_layout(height=<span class="num">350</span> * nrows, title_text=<span class="st">"Feature Distributions"</span>)
+
+<span class="cm"># ── Normality tests — THREE methods for robustness ──</span>
+<span class="kw">from</span> <span class="im">scipy.stats</span> <span class="kw">import</span> shapiro, normaltest, kstest
+
+sample = df[<span class="st">'fare_amount'</span>].drop_nulls().sample(<span class="num">5000</span>).to_numpy()
+
+sw_stat, sw_p = shapiro(sample)          <span class="cm"># best for n &lt; 5000</span>
+da_stat, da_p = normaltest(sample)       <span class="cm"># D'Agostino-Pearson (skew+kurtosis)</span>
+ks_stat, ks_p = kstest((sample - sample.mean()) / sample.std(), <span class="st">'norm'</span>)
+
+<span class="cm"># ── QQ plot: visual normality check ──</span>
+(osm, osr), (slope, intercept, r) = stats.probplot(sample, dist=<span class="st">"norm"</span>)
+fig_qq = go.Figure()
+fig_qq.add_trace(go.Scatter(x=osm, y=osr, mode=<span class="st">'markers'</span>,
+                             marker=<span class="fn">dict</span>(size=<span class="num">3</span>, opacity=<span class="num">0.5</span>)))
+x_line = np.array([osm.min(), osm.max()])
+fig_qq.add_trace(go.Scatter(x=x_line, y=slope*x_line + intercept,
+                             mode=<span class="st">'lines'</span>, line=<span class="fn">dict</span>(color=<span class="st">'red'</span>, dash=<span class="st">'dash'</span>)))
+<span class="cm"># Points on the diagonal → normal</span>
+<span class="cm"># S-shape → heavy tails. Curve upward → right-skewed</span>
+
+<span class="cm"># ── Violin + box: distribution shape + quartiles together ──</span>
+fig_v = px.violin(df.filter(
+    (pl.col(<span class="st">'fare_amount'</span>) > <span class="num">0</span>) & (pl.col(<span class="st">'fare_amount'</span>) &lt; <span class="num">100</span>)
+).to_pandas(), y=<span class="st">'fare_amount'</span>, box=<span class="kw">True</span>,
+    title=<span class="st">"Fare Amount Distribution"</span>)</div>
+  </div>
+
+  <div class="interp-box">
+    <h5>Reading Distribution Shapes</h5>
+    <ul>
+      <li><strong>Normal bell curve:</strong> Symmetric, single peak. Mean ≈ median ≈ mode. Most ML algorithms assume this.</li>
+      <li><strong>Right skew (positive):</strong> Long tail to the right. Mean &gt; median. Common in: prices, income, wait times. Apply log(1+x) transform.</li>
+      <li><strong>Bimodal (two peaks):</strong> Often two subpopulations mixed. Split by segment, or add a cluster label feature.</li>
+      <li><strong>Uniform:</strong> All values equally likely. Could be: random IDs, index columns. Usually not informative.</li>
+      <li><strong>Spike at zero:</strong> Zero-inflated distribution (e.g., tip_amount for cash rides). Model separately or use zero-inflation technique.</li>
+    </ul>
+  </div>
+
+  <h2 class="sub">Categorical Features</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">univariate_categorical.py</span></div>
+    <div class="code-body"><span class="cm"># ── Frequency table with cumulative percentage ──</span>
+<span class="kw">def</span> <span class="fn">frequency_table</span>(df: pl.DataFrame, col: str, top_n: int = <span class="num">20</span>) -> pl.DataFrame:
+    <span class="kw">return</span> (df
+            .group_by(col)
+            .agg(pl.len().alias(<span class="st">"count"</span>))
+            .sort(<span class="st">"count"</span>, descending=<span class="kw">True</span>)
+            .head(top_n)
+            .with_columns([
+                (pl.col(<span class="st">"count"</span>) / df.height * <span class="num">100</span>).round(<span class="num">2</span>).alias(<span class="st">"pct"</span>),
+                (pl.col(<span class="st">"count"</span>).cum_sum() / df.height * <span class="num">100</span>).round(<span class="num">2</span>).alias(<span class="st">"cum_pct"</span>)
+            ]))
+
+<span class="cm"># ── Pareto chart: bars (frequency) + line (cumulative %) ──</span>
+freq = frequency_table(df, <span class="st">'PULocationID'</span>, top_n=<span class="num">20</span>).to_pandas()
+fig = make_subplots(specs=[[{<span class="st">"secondary_y"</span>: <span class="kw">True</span>}]])
+fig.add_trace(go.Bar(x=freq[<span class="st">'PULocationID'</span>].astype(str), y=freq[<span class="st">"count"</span>],
+                     name=<span class="st">"Frequency"</span>), secondary_y=<span class="kw">False</span>)
+fig.add_trace(go.Scatter(x=freq[<span class="st">'PULocationID'</span>].astype(str), y=freq[<span class="st">"cum_pct"</span>],
+                          name=<span class="st">"Cumulative %"</span>, mode=<span class="st">'lines+markers'</span>),
+              secondary_y=<span class="kw">True</span>)
+fig.add_hline(y=<span class="num">80</span>, line_dash=<span class="st">"dash"</span>, annotation_text=<span class="st">"80%"</span>, secondary_y=<span class="kw">True</span>)
+<span class="cm"># → Identify which 20% of pickup zones account for 80% of trips</span>
+
+<span class="cm"># ── Treemap: hierarchical frequency view ──</span>
+fig_tree = px.treemap(freq, path=[<span class="st">'PULocationID'</span>], values=<span class="st">"count"</span>,
+                       color=<span class="st">"count"</span>, color_continuous_scale=<span class="st">"Blues"</span>)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     05 — BIVARIATE
+═════════════════════════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-title">Bivariate Analysis</div>
+      <div class="section-desc">Analyze relationships between pairs of variables. Three combinations: numerical×numerical, numerical×categorical, categorical×categorical. Each needs different methods.</div>
+    </div>
+  </div>
+
+  <h2 class="sub">Numerical × Numerical</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">bivariate_num_num.py</span></div>
+    <div class="code-body"><span class="cm"># ── Correlation matrix: Pearson + Spearman ──</span>
+pdf_num = df.select(num_cols).to_pandas()
+
+pearson_corr = pdf_num.corr(method=<span class="st">'pearson'</span>)
+spearman_corr = pdf_num.corr(method=<span class="st">'spearman'</span>)  <span class="cm"># robust to outliers</span>
+
+fig = px.imshow(spearman_corr, color_continuous_scale=<span class="st">"RdBu_r"</span>,
+                zmin=-<span class="num">1</span>, zmax=<span class="num">1</span>, text_auto=<span class="st">".2f"</span>,
+                title=<span class="st">"Spearman Correlation Matrix"</span>)
+<span class="cm"># Use Spearman (rank-based) when data is non-normal or has outliers</span>
+<span class="cm"># Use Pearson only when both variables are normally distributed</span>
+
+<span class="cm"># ── Hexbin: for dense scatter plots (>50K points) ──</span>
+<span class="cm"># Standard scatter → overplotting, all you see is a black blob</span>
+fig_hex = go.Figure(go.Histogram2dContour(
+    x=df.filter(
+        (pl.col(<span class="st">'trip_distance'</span>) > <span class="num">0</span>) & (pl.col(<span class="st">'trip_distance'</span>) &lt; <span class="num">30</span>) &
+        (pl.col(<span class="st">'fare_amount'</span>) > <span class="num">0</span>) & (pl.col(<span class="st">'fare_amount'</span>) &lt; <span class="num">100</span>)
+    ).sample(<span class="num">50000</span>, seed=<span class="num">42</span>)[<span class="st">'trip_distance'</span>].to_list(),
+    y=df.filter(
+        (pl.col(<span class="st">'trip_distance'</span>) > <span class="num">0</span>) & (pl.col(<span class="st">'fare_amount'</span>) > <span class="num">0</span>) &
+        (pl.col(<span class="st">'fare_amount'</span>) &lt; <span class="num">100</span>)
+    ).sample(<span class="num">50000</span>, seed=<span class="num">42</span>)[<span class="st">'fare_amount'</span>].to_list(),
+    colorscale=<span class="st">'Blues'</span>, contours=<span class="fn">dict</span>(showlabels=<span class="kw">True</span>)
+))
+fig_hex.update_layout(title=<span class="st">"Density: Trip Distance vs Fare Amount"</span>)
+
+<span class="cm"># ── Scatter with OLS trendline ──</span>
+fig_reg = px.scatter(df_clean.sample(<span class="num">5000</span>).to_pandas(),
+                      x=<span class="st">'trip_distance'</span>, y=<span class="st">'fare_amount'</span>,
+                      trendline=<span class="st">"ols"</span>, opacity=<span class="num">0.3</span>,
+                      title=<span class="st">"Fare vs Distance with OLS Trendline"</span>)</div>
+  </div>
+
+  <div class="alert alert-info">
+    <div class="alert-icon">📊</div>
+    <div class="alert-body"><strong>NYC Taxi finding:</strong> Spearman correlation between trip_distance and fare_amount = 0.87 (strong). But the hexbin reveals two distinct clusters: short trips (&lt;2mi) with high per-mile rates (airport surcharges?), and standard metered trips. This bimodality would be invisible from the correlation number alone.</div>
+  </div>
+
+  <h2 class="sub">Numerical × Categorical — Statistical Tests</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">bivariate_num_cat.py</span></div>
+    <div class="code-body"><span class="cm"># ── Group statistics (Polars — fast even on 3M rows) ──</span>
+group_stats = (df
+    .group_by(<span class="st">'payment_type'</span>)
+    .agg([
+        pl.col(<span class="st">'tip_amount'</span>).count().alias(<span class="st">"n"</span>),
+        pl.col(<span class="st">'tip_amount'</span>).mean().round(<span class="num">2</span>).alias(<span class="st">"mean"</span>),
+        pl.col(<span class="st">'tip_amount'</span>).median().alias(<span class="st">"median"</span>),
+        pl.col(<span class="st">'tip_amount'</span>).std().round(<span class="num">2</span>).alias(<span class="st">"std"</span>),
+    ])
+    .sort(<span class="st">"mean"</span>, descending=<span class="kw">True</span>))
+
+<span class="cm"># ── ANOVA: are group means significantly different? ──</span>
+groups = []
+<span class="kw">for</span> ptype, gdf <span class="kw">in</span> df.group_by(<span class="st">'payment_type'</span>):
+    vals = gdf[<span class="st">'tip_amount'</span>].drop_nulls().to_numpy()
+    <span class="kw">if</span> <span class="fn">len</span>(vals) >= <span class="num">5</span>:
+        groups.append(vals)
+
+f_stat, p_val = stats.f_oneway(*groups)
+<span class="cm"># H0: all group means equal. p &lt; 0.05 → significant difference</span>
+
+<span class="cm"># ── Kruskal-Wallis (non-parametric ANOVA) ──</span>
+kw_stat, kw_p = stats.kruskal(*groups)
+<span class="cm"># Use Kruskal-Wallis when data is NOT normally distributed</span>
+
+<span class="cm"># ── Effect size: Eta-squared ──</span>
+grand_mean = df[<span class="st">'tip_amount'</span>].drop_nulls().mean()
+ss_between = <span class="fn">sum</span>(<span class="fn">len</span>(g) * (g.mean() - grand_mean)**<span class="num">2</span> <span class="kw">for</span> g <span class="kw">in</span> groups)
+ss_total = <span class="fn">sum</span>((v - grand_mean)**<span class="num">2</span> <span class="kw">for</span> g <span class="kw">in</span> groups <span class="kw">for</span> v <span class="kw">in</span> g)
+eta_sq = ss_between / ss_total
+<span class="cm"># small=0.01, medium=0.06, large=0.14</span>
+
+<span class="cm"># ── Grouped violin plot ──</span>
+fig_v = px.violin(df.filter(
+    pl.col(<span class="st">'tip_amount'</span>) &lt; <span class="num">20</span>).to_pandas(),
+    x=<span class="st">'payment_type'</span>, y=<span class="st">'tip_amount'</span>, box=<span class="kw">True</span>,
+    color=<span class="st">'payment_type'</span>, points=<span class="kw">False</span>,
+    title=<span class="st">"Tip Amount by Payment Type"</span>)</div>
+  </div>
+
+  <h2 class="sub">Categorical × Categorical — Chi-Square & Cramér's V</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">bivariate_cat_cat.py</span></div>
+    <div class="code-body"><span class="cm"># ── Contingency table + heatmap ──</span>
+pdf_sub = df.select([<span class="st">'payment_type'</span>, <span class="st">'VendorID'</span>]).to_pandas()
+ct = pd.crosstab(pdf_sub[<span class="st">'payment_type'</span>], pdf_sub[<span class="st">'VendorID'</span>],
+                 normalize=<span class="st">'index'</span>)  <span class="cm"># row percentages</span>
+
+fig_ct = px.imshow(ct, title=<span class="st">"Payment Type × Vendor (row %)"</span>,
+                    color_continuous_scale=<span class="st">"Blues"</span>, text_auto=<span class="st">".1%"</span>)
+
+<span class="cm"># ── Chi-square test of independence ──</span>
+<span class="kw">from</span> <span class="im">scipy.stats</span> <span class="kw">import</span> chi2_contingency
+ct_raw = pd.crosstab(pdf_sub[<span class="st">'payment_type'</span>], pdf_sub[<span class="st">'VendorID'</span>])
+chi2, p, dof, expected = chi2_contingency(ct_raw)
+<span class="cm"># H0: the two variables are independent</span>
+
+<span class="cm"># ── Cramér's V: association strength (0=none, 1=perfect) ──</span>
+n = ct_raw.sum().sum()
+min_dim = <span class="fn">min</span>(ct_raw.shape) - <span class="num">1</span>
+cramers_v = np.sqrt(chi2 / (n * min_dim))
+<span class="cm"># &lt;0.1: weak, 0.1-0.3: moderate, >0.3: strong association</span></div>
+  </div>
+
+  <table class="method-table">
+    <thead><tr><th>Test</th><th>When to Use</th><th>H₀ (Null Hypothesis)</th><th>Effect Size Metric</th></tr></thead>
+    <tbody>
+      <tr><td>Pearson r <span class="tag tag-num">num</span></td><td>Both normal, linear relationship</td><td>ρ = 0 (no correlation)</td><td>r² (variance explained)</td></tr>
+      <tr><td>Spearman ρ <span class="tag tag-num">num</span></td><td>Non-normal, monotonic relationship</td><td>ρ = 0</td><td>ρ² or interpretation</td></tr>
+      <tr><td>One-way ANOVA <span class="tag tag-both">both</span></td><td>Compare means of 3+ groups</td><td>All group means equal</td><td>Eta-squared (η²)</td></tr>
+      <tr><td>Kruskal-Wallis <span class="tag tag-both">both</span></td><td>Non-parametric ANOVA alternative</td><td>All group distributions equal</td><td>Epsilon-squared</td></tr>
+      <tr><td>Chi-square <span class="tag tag-cat">cat</span></td><td>Independence of two categoricals</td><td>Variables are independent</td><td>Cramér's V</td></tr>
+      <tr><td>Point-biserial <span class="tag tag-both">both</span></td><td>Continuous × binary variable</td><td>No correlation</td><td>r²pb</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     06 — MULTIVARIATE
+═════════════════════════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-title">Multivariate Analysis</div>
+      <div class="section-desc">Relationships involving 3+ variables. PCA reveals hidden structure, t-SNE shows clusters, VIF catches multicollinearity. These methods are computationally expensive — sample first.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">multivariate.py</span></div>
+    <div class="code-body"><span class="cm"># ── PCA: principal component analysis ──</span>
+<span class="kw">from</span> <span class="im">sklearn.decomposition</span> <span class="kw">import</span> PCA
+<span class="kw">from</span> <span class="im">sklearn.preprocessing</span> <span class="kw">import</span> StandardScaler
+
+pdf = df.select(num_cols).drop_nulls().to_pandas()
+pdf = pdf.sample(<span class="num">50000</span>, random_state=<span class="num">42</span>)
+
+<span class="cm"># Step 1: Always standardize before PCA!</span>
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(pdf)
+
+<span class="cm"># Step 2: Fit PCA</span>
+pca = PCA(n_components=<span class="num">10</span>)
+X_pca = pca.fit_transform(X_scaled)
+
+<span class="cm"># Scree plot: choose components at the "elbow"</span>
+exp_var = pca.explained_variance_ratio_
+cum_var = np.cumsum(exp_var)
+fig_scree = px.bar(x=[<span class="st">f"PC{i+1}"</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(exp_var))],
+                    y=exp_var*<span class="num">100</span>, title=<span class="st">"PCA Scree Plot"</span>)
+<span class="cm"># Rule: keep PCs that explain >1% variance, or reach 90% cumulative</span>
+
+<span class="cm"># Loadings heatmap: which features drive each PC?</span>
+loadings = pd.DataFrame(pca.components_.T, index=num_cols,
+                         columns=[<span class="st">f"PC{i+1}"</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(pca.n_components_)])
+fig_load = px.imshow(loadings, color_continuous_scale=<span class="st">"RdBu_r"</span>,
+                      zmin=-<span class="num">1</span>, zmax=<span class="num">1</span>, text_auto=<span class="st">".2f"</span>)
+
+<span class="cm"># ── t-SNE: non-linear dimensionality reduction ──</span>
+<span class="kw">from</span> <span class="im">sklearn.manifold</span> <span class="kw">import</span> TSNE
+tsne = TSNE(n_components=<span class="num">2</span>, perplexity=<span class="num">30</span>, random_state=<span class="num">42</span>)
+X_2d = tsne.fit_transform(X_scaled[:<span class="num">5000</span>])  <span class="cm"># slow: cap at 5K</span>
+fig_tsne = px.scatter(x=X_2d[:, <span class="num">0</span>], y=X_2d[:, <span class="num">1</span>], opacity=<span class="num">0.5</span>,
+                       title=<span class="st">"t-SNE Visualization"</span>)
+<span class="cm"># Perplexity 5-50: lower = local structure, higher = global</span>
+<span class="cm"># For >50K samples: use UMAP instead (10-100x faster)</span>
+
+<span class="cm"># ── UMAP (recommended for large datasets) ──</span>
+<span class="cm"># import umap</span>
+<span class="cm"># reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, random_state=42)</span>
+<span class="cm"># X_umap = reducer.fit_transform(X_scaled)</span>
+
+<span class="cm"># ── Parallel coordinates plot ──</span>
+fig_pc = px.parallel_coordinates(
+    pdf.sample(<span class="num">2000</span>, random_state=<span class="num">42</span>),
+    dimensions=num_cols,
+    color=<span class="st">'fare_amount'</span>,
+    color_continuous_scale=<span class="st">"Viridis"</span>,
+    title=<span class="st">"Parallel Coordinates — brush any axis to filter"</span>)
+
+<span class="cm"># ── VIF: detect multicollinearity ──</span>
+<span class="kw">from</span> <span class="im">statsmodels.stats.outliers_influence</span> <span class="kw">import</span> variance_inflation_factor
+<span class="kw">import</span> <span class="im">statsmodels.api</span> <span class="kw">as</span> sm
+
+X = sm.add_constant(pdf.dropna().sample(<span class="num">10000</span>))
+vif_scores = [variance_inflation_factor(X.values, i+<span class="num">1</span>)
+              <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(num_cols))]
+<span class="cm"># VIF > 5: high multicollinearity → consider dropping one of the pair</span>
+<span class="cm"># VIF > 10: severe → must address before linear regression</span></div>
+  </div>
+
+  <div class="interp-box">
+    <h5>Interpreting PCA Results for NYC Taxi</h5>
+    <ul>
+      <li><strong>PC1</strong> typically captures the "trip cost" axis: fare, total, tip, tolls all load positively → high PC1 = expensive trip</li>
+      <li><strong>PC2</strong> often captures "tipping behavior": tip_amount loads opposite to passenger_count → fewer passengers tip more</li>
+      <li><strong>Scree elbow</strong> at PC3: 3 components explain ~91% of variance → the feature space is actually low-dimensional despite 19 columns</li>
+      <li><strong>High VIF</strong> expected between fare_amount, total_amount, tip_amount (they're additive by construction)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     07 — OUTLIER DETECTION
+═════════════════════════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-title">Outlier Detection</div>
+      <div class="section-desc">Outliers can be errors (remove), rare events (keep + flag), or the signal itself (anomaly detection tasks). Never blindly delete — always investigate first.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">outliers.py</span></div>
+    <div class="code-body"><span class="cm"># ── Method 1: IQR Fences (Tukey) ──</span>
+<span class="kw">def</span> <span class="fn">iqr_outliers</span>(df: pl.DataFrame, col: str) -> dict:
+    q1, q3 = df[col].quantile(<span class="num">0.25</span>), df[col].quantile(<span class="num">0.75</span>)
+    iqr = q3 - q1
+    lower, upper = q1 - <span class="num">1.5</span> * iqr, q3 + <span class="num">1.5</span> * iqr
+    n_out = df.filter((pl.col(col) &lt; lower) | (pl.col(col) > upper)).height
+    <span class="kw">return</span> {<span class="st">"lower"</span>: lower, <span class="st">"upper"</span>: upper, <span class="st">"n_outliers"</span>: n_out,
+            <span class="st">"pct"</span>: n_out / df.height * <span class="num">100</span>}
+
+<span class="cm"># ── Method 2: Z-Score (assumes normality) ──</span>
+<span class="kw">def</span> <span class="fn">zscore_outliers</span>(df: pl.DataFrame, col: str, threshold: float = <span class="num">3.0</span>):
+    mean, std = df[col].mean(), df[col].std()
+    z = ((df[col] - mean) / std).abs()
+    <span class="kw">return</span> df.filter(z > threshold)  <span class="cm"># threshold=3 → 0.3% false positive rate</span>
+
+<span class="cm"># ── Method 3: Modified Z-Score (robust, uses MAD) ──</span>
+<span class="cm"># Use this when data is skewed (preferred over standard Z-score)</span>
+<span class="kw">def</span> <span class="fn">modified_zscore</span>(df: pl.DataFrame, col: str, threshold: float = <span class="num">3.5</span>):
+    median = df[col].median()
+    mad = (df[col] - median).abs().median()
+    mz = (<span class="num">0.6745</span> * (df[col] - median) / mad).abs()
+    <span class="kw">return</span> df.filter(mz > threshold)
+
+<span class="cm"># ── Method 4: Isolation Forest (multivariate, non-parametric) ──</span>
+<span class="kw">from</span> <span class="im">sklearn.ensemble</span> <span class="kw">import</span> IsolationForest
+
+pdf = df.select(num_cols).drop_nulls().to_pandas().sample(<span class="num">50000</span>)
+iforest = IsolationForest(n_estimators=<span class="num">100</span>, contamination=<span class="num">0.05</span>,
+                           random_state=<span class="num">42</span>, n_jobs=-<span class="num">1</span>)
+labels = iforest.fit_predict(pdf)  <span class="cm"># -1 = outlier, 1 = normal</span>
+scores = iforest.decision_function(pdf)  <span class="cm"># more negative = more anomalous</span>
+
+pdf[<span class="st">'is_outlier'</span>] = labels == -<span class="num">1</span>
+pdf[<span class="st">'anomaly_score'</span>] = scores
+
+<span class="cm"># ── Method 5: Local Outlier Factor (density-based) ──</span>
+<span class="kw">from</span> <span class="im">sklearn.neighbors</span> <span class="kw">import</span> LocalOutlierFactor
+lof = LocalOutlierFactor(n_neighbors=<span class="num">20</span>, contamination=<span class="num">0.05</span>)
+lof_labels = lof.fit_predict(pdf[num_cols])
+<span class="cm"># Better for clusters of different densities</span>
+
+<span class="cm"># ── Visualize: standardized box plots ──</span>
+<span class="kw">from</span> <span class="im">sklearn.preprocessing</span> <span class="kw">import</span> StandardScaler
+X_scaled = StandardScaler().fit_transform(pdf[num_cols])
+pdf_scaled = pd.DataFrame(X_scaled, columns=num_cols)
+pdf_melted = pdf_scaled.melt(var_name=<span class="st">"Feature"</span>, value_name=<span class="st">"Standardized"</span>)
+fig_box = px.box(pdf_melted, x=<span class="st">"Feature"</span>, y=<span class="st">"Standardized"</span>,
+                  title=<span class="st">"Outlier Box Plots (standardized)"</span>, points=<span class="st">"outliers"</span>)</div>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--green)"></div><h4>Keep the outlier if…</h4></div>
+      <p>It represents a real, valid extreme event. E.g., a $200 taxi fare for a JFK→upstate trip. Flag it with an indicator feature <code>is_high_fare=1</code> instead of deleting.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--red)"></div><h4>Remove the outlier if…</h4></div>
+      <p>It's clearly a data error: negative fare_amount, trip_distance = 5000 miles, year 1970 timestamp. Log all removals and their justification in your EDA notes.</p>
+    </div>
+    <div class="concept-card">
+      <div class="cc-header"><div class="cc-dot" style="background:var(--amber)"></div><h4>Winsorize/Cap if…</h4></div>
+      <p>Outlier is real but disproportionately influences models. Cap at 99th percentile: <code>df[col].clip(upper=df[col].quantile(0.99))</code>. Common in price/revenue data.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     08 — TIME SERIES
+═════════════════════════════════════════════════ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div>
+      <div class="section-title">Time Series EDA</div>
+      <div class="section-desc">Any dataset with timestamps is a time series. Temporal patterns — rush hours, weekday/weekend effects, seasonality — are often the strongest predictive signals.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">time_series.py</span></div>
+    <div class="code-body"><span class="cm"># ── Extract temporal features ──</span>
+df = df.with_columns([
+    pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.year().alias(<span class="st">"year"</span>),
+    pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.month().alias(<span class="st">"month"</span>),
+    pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.day().alias(<span class="st">"day"</span>),
+    pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.weekday().alias(<span class="st">"weekday"</span>),  <span class="cm"># 0=Mon</span>
+    pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.hour().alias(<span class="st">"hour"</span>),
+    (pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.weekday() >= <span class="num">5</span>).alias(<span class="st">"is_weekend"</span>),
+    pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.quarter().alias(<span class="st">"quarter"</span>),
+])
+<span class="cm"># These temporal features are often among the top predictors!</span>
+
+<span class="cm"># ── Aggregate by hour ──</span>
+hourly = (df
+    .with_columns(pl.col(<span class="st">'tpep_pickup_datetime'</span>).dt.truncate(<span class="st">'1h'</span>).alias(<span class="st">"hour_bucket"</span>))
+    .group_by(<span class="st">"hour_bucket"</span>)
+    .agg([
+        pl.len().alias(<span class="st">"trip_count"</span>),
+        pl.col(<span class="st">"fare_amount"</span>).mean().alias(<span class="st">"avg_fare"</span>)
+    ])
+    .sort(<span class="st">"hour_bucket"</span>)
+    .to_pandas())
+
+fig_ts = make_subplots(rows=<span class="num">2</span>, cols=<span class="num">1</span>, shared_xaxes=<span class="kw">True</span>)
+fig_ts.add_trace(go.Bar(x=hourly[<span class="st">"hour_bucket"</span>], y=hourly[<span class="st">"trip_count"</span>],
+                         name=<span class="st">"Trip Count"</span>), row=<span class="num">1</span>, col=<span class="num">1</span>)
+fig_ts.add_trace(go.Scatter(x=hourly[<span class="st">"hour_bucket"</span>], y=hourly[<span class="st">"avg_fare"</span>],
+                              name=<span class="st">"Avg Fare"</span>), row=<span class="num">2</span>, col=<span class="num">1</span>)
+
+<span class="cm"># ── Calendar heatmap: hour × day-of-week ──</span>
+hour_day = (df
+    .group_by([<span class="st">"hour"</span>, <span class="st">"weekday"</span>])
+    .agg(pl.len().alias(<span class="st">"count"</span>))
+    .to_pandas())
+
+pivot = hour_day.pivot_table(index=<span class="st">"hour"</span>, columns=<span class="st">"weekday"</span>,
+                               values=<span class="st">"count"</span>, aggfunc=<span class="st">"sum"</span>)
+pivot.columns = [<span class="st">"Mon"</span>, <span class="st">"Tue"</span>, <span class="st">"Wed"</span>, <span class="st">"Thu"</span>, <span class="st">"Fri"</span>, <span class="st">"Sat"</span>, <span class="st">"Sun"</span>]
+fig_cal = px.imshow(pivot, title=<span class="st">"Trips: Hour × Day of Week"</span>,
+                     color_continuous_scale=<span class="st">"Viridis"</span>, aspect=<span class="st">"auto"</span>)
+
+<span class="cm"># ── Seasonal decomposition ──</span>
+<span class="kw">from</span> <span class="im">statsmodels.tsa.seasonal</span> <span class="kw">import</span> seasonal_decompose
+ts = hourly.set_index(<span class="st">"hour_bucket"</span>)[<span class="st">"trip_count"</span>]
+result = seasonal_decompose(ts, model=<span class="st">"additive"</span>, period=<span class="num">24</span>)  <span class="cm"># 24h seasonality</span>
+<span class="cm"># Outputs: trend, seasonal, residual components</span>
+
+<span class="cm"># ── ACF & PACF ──</span>
+<span class="kw">from</span> <span class="im">statsmodels.tsa.stattools</span> <span class="kw">import</span> acf, pacf
+acf_vals, acf_conf = acf(ts.dropna(), nlags=<span class="num">48</span>, alpha=<span class="num">0.05</span>)
+pacf_vals, pacf_conf = pacf(ts.dropna(), nlags=<span class="num">48</span>, alpha=<span class="num">0.05</span>)
+<span class="cm"># Significant ACF lag k: real autocorrelation at lag k</span>
+<span class="cm"># PACF cuts off after lag p → AR(p) model order</span></div>
+  </div>
+
+  <div class="interp-box">
+    <h5>NYC Taxi Time Series Findings</h5>
+    <ul>
+      <li><strong>Daily peaks:</strong> 8–9 AM and 5–7 PM (commute rush). Lowest 3–5 AM.</li>
+      <li><strong>Friday &amp; Saturday nights:</strong> 2–4× higher trip volume 10 PM–2 AM vs weekdays</li>
+      <li><strong>Seasonal decomposition:</strong> Clear 24h period dominates. Trend component shows gradual increase through January</li>
+      <li><strong>ACF:</strong> Significant at lags 1, 2, 24, 48 → strong daily seasonality + short-term autocorrelation</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     09 — GEOSPATIAL
+═════════════════════════════════════════════════ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">09</div>
+    <div>
+      <div class="section-title">Geospatial EDA</div>
+      <div class="section-desc">For datasets with lat/lon coordinates, maps reveal spatial patterns invisible in tabular form: hotspots, corridors, clusters, and geographic anomalies.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">geospatial.py</span></div>
+    <div class="code-body"><span class="cm"># ── Density heatmap (Mapbox) ──</span>
+pdf_geo = df.filter(
+    pl.col(<span class="st">'pickup_latitude'</span>).is_between(<span class="num">40.4</span>, <span class="num">41.0</span>) &
+    pl.col(<span class="st">'pickup_longitude'</span>).is_between(-<span class="num">74.3</span>, -<span class="num">73.6</span>)
+).sample(<span class="num">50000</span>, seed=<span class="num">42</span>).to_pandas()
+
+fig_map = px.density_mapbox(
+    pdf_geo, lat=<span class="st">'pickup_latitude'</span>, lon=<span class="st">'pickup_longitude'</span>,
+    z=<span class="st">'fare_amount'</span>,           <span class="cm"># color by fare (revenue hotspots)</span>
+    radius=<span class="num">5</span>, zoom=<span class="num">10</span>,
+    center={<span class="st">"lat"</span>: <span class="num">40.7128</span>, <span class="st">"lon"</span>: -<span class="num">74.0060</span>},
+    mapbox_style=<span class="st">"carto-positron"</span>,
+    title=<span class="st">"NYC Taxi Pickup Density (colored by fare)"</span>
+)
+
+<span class="cm"># ── For zone-based data (newer taxi dataset uses LocationID) ──</span>
+zone_counts = (df
+    .group_by(<span class="st">'PULocationID'</span>)
+    .agg([
+        pl.len().alias(<span class="st">"pickup_count"</span>),
+        pl.col(<span class="st">'fare_amount'</span>).mean().alias(<span class="st">"avg_fare"</span>),
+        pl.col(<span class="st">'tip_amount'</span>).mean().alias(<span class="st">"avg_tip"</span>),
+    ])
+    .sort(<span class="st">"pickup_count"</span>, descending=<span class="kw">True</span>))
+
+<span class="cm"># Top 10 pickup zones by volume</span>
+<span class="fn">print</span>(zone_counts.head(<span class="num">10</span>))
+
+<span class="cm"># ── Scatter map: individual points colored by metric ──</span>
+fig_scatter = px.scatter_mapbox(
+    pdf_geo.sample(<span class="num">5000</span>),
+    lat=<span class="st">'pickup_latitude'</span>, lon=<span class="st">'pickup_longitude'</span>,
+    color=<span class="st">'tip_amount'</span>, size=<span class="st">'fare_amount'</span>,
+    color_continuous_scale=<span class="st">"Plasma"</span>,
+    zoom=<span class="num">10</span>, opacity=<span class="num">0.6</span>,
+    mapbox_style=<span class="st">"carto-positron"</span>,
+    title=<span class="st">"Pickups: size=fare, color=tip"</span>
+)
+
+<span class="cm"># ── Spatial statistics ──</span>
+lat = pdf_geo[<span class="st">'pickup_latitude'</span>].values
+lon = pdf_geo[<span class="st">'pickup_longitude'</span>].values
+<span class="fn">print</span>(<span class="st">f"Centroid: ({lat.mean():.4f}, {lon.mean():.4f})"</span>)
+<span class="fn">print</span>(<span class="st">f"Spread: lat_std={lat.std():.4f}, lon_std={lon.std():.4f}"</span>)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     10 — TARGET ANALYSIS
+═════════════════════════════════════════════════ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div>
+      <div class="section-title">Target Variable Analysis</div>
+      <div class="section-desc">When a target exists, shift from descriptive to predictive EDA. Measure each feature's relevance to the target using model-free (MI) and model-based (RF) methods.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">target_analysis.py</span></div>
+    <div class="code-body"><span class="cm"># ── Mutual Information: captures ANY kind of dependency ──</span>
+<span class="kw">from</span> <span class="im">sklearn.feature_selection</span> <span class="kw">import</span> mutual_info_regression, mutual_info_classif
+
+<span class="cm"># Create target: tip percentage</span>
+df_clean = df.filter(
+    (pl.col(<span class="st">'fare_amount'</span>) > <span class="num">2</span>) & (pl.col(<span class="st">'fare_amount'</span>) &lt; <span class="num">200</span>) &
+    (pl.col(<span class="st">'trip_distance'</span>) > <span class="num">0</span>) & (pl.col(<span class="st">'trip_distance'</span>) &lt; <span class="num">50</span>)
+).with_columns(
+    (pl.col(<span class="st">'tip_amount'</span>) / pl.col(<span class="st">'fare_amount'</span>) * <span class="num">100</span>).alias(<span class="st">'tip_pct'</span>)
+)
+
+feature_cols = [<span class="st">'trip_distance'</span>, <span class="st">'passenger_count'</span>, <span class="st">'hour'</span>, <span class="st">'weekday'</span>]
+pdf = df_clean.select(feature_cols + [<span class="st">'tip_pct'</span>]).drop_nulls().to_pandas()
+pdf = pdf.sample(<span class="num">50000</span>, random_state=<span class="num">42</span>)
+
+mi_scores = mutual_info_regression(pdf[feature_cols], pdf[<span class="st">'tip_pct'</span>])
+mi_df = pd.DataFrame({<span class="st">"feature"</span>: feature_cols, <span class="st">"mi_score"</span>: mi_scores})
+mi_df = mi_df.sort_values(<span class="st">"mi_score"</span>, ascending=<span class="kw">False</span>)
+
+fig_mi = px.bar(mi_df, x=<span class="st">"mi_score"</span>, y=<span class="st">"feature"</span>, orientation=<span class="st">'h'</span>,
+                 title=<span class="st">"Mutual Information: Feature → Target"</span>,
+                 color=<span class="st">"mi_score"</span>, color_continuous_scale=<span class="st">"Blues"</span>)
+
+<span class="cm"># ── Random Forest importance ──</span>
+<span class="kw">from</span> <span class="im">sklearn.ensemble</span> <span class="kw">import</span> RandomForestRegressor
+<span class="kw">from</span> <span class="im">sklearn.inspection</span> <span class="kw">import</span> permutation_importance
+
+rf = RandomForestRegressor(n_estimators=<span class="num">100</span>, n_jobs=-<span class="num">1</span>,
+                            random_state=<span class="num">42</span>, max_depth=<span class="num">5</span>)
+rf.fit(pdf[feature_cols], pdf[<span class="st">'tip_pct'</span>])
+
+<span class="cm"># MDI importance (fast, slightly biased)</span>
+mdi_imp = pd.DataFrame({<span class="st">"feature"</span>: feature_cols,
+                         <span class="st">"importance"</span>: rf.feature_importances_})
+
+<span class="cm"># Permutation importance (slower, unbiased — preferred)</span>
+perm = permutation_importance(rf, pdf[feature_cols], pdf[<span class="st">'tip_pct'</span>],
+                               n_repeats=<span class="num">10</span>, random_state=<span class="num">42</span>)
+perm_df = pd.DataFrame({<span class="st">"feature"</span>: feature_cols,
+                          <span class="st">"perm_mean"</span>: perm.importances_mean,
+                          <span class="st">"perm_std"</span>: perm.importances_std})
+
+<span class="cm"># ── Target vs each feature ──</span>
+<span class="kw">for</span> feat <span class="kw">in</span> feature_cols:
+    pdf_temp = pdf.copy()
+    pdf_temp[<span class="st">"bin"</span>] = pd.cut(pdf_temp[feat], bins=<span class="num">10</span>)
+    grouped = pdf_temp.groupby(<span class="st">"bin"</span>, observed=<span class="kw">True</span>)[<span class="st">'tip_pct'</span>].agg([<span class="st">'mean'</span>,<span class="st">'count'</span>])
+    fig = px.bar(grouped.reset_index(), x=<span class="st">"bin"</span>, y=<span class="st">"mean"</span>,
+                  title=<span class="st">f"Mean tip_pct by {feat} bin"</span>)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     11 — DATA QUALITY AUDIT
+═════════════════════════════════════════════════ -->
+<section class="section" id="s11">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <div>
+      <div class="section-title">Data Quality Audit</div>
+      <div class="section-desc">Industrial datasets are always messy. A rigorous quality audit prevents "garbage in, garbage out" — and catches issues that can silently corrupt your model.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">data_quality.py</span></div>
+    <div class="code-body"><span class="cm"># ── 1. Duplicates ──</span>
+full_dups = df.height - df.unique().height
+print(<span class="st">f"Full duplicates: {full_dups:,} ({full_dups/df.height*100:.2f}%)"</span>)
+
+<span class="cm"># Key-based duplicates (same trip start/end time + location)</span>
+key_cols = [<span class="st">'tpep_pickup_datetime'</span>, <span class="st">'PULocationID'</span>, <span class="st">'DOLocationID'</span>]
+key_dups = df.height - df.unique(subset=key_cols).height
+print(<span class="st">f"Key duplicates: {key_dups:,}"</span>)
+
+<span class="cm"># ── 2. Impossible values (domain knowledge!) ──</span>
+<span class="cm"># Negative fare amounts → data error</span>
+neg_fare = df.filter(pl.col(<span class="st">'fare_amount'</span>) &lt; <span class="num">0</span>).height
+print(<span class="st">f"Negative fares: {neg_fare:,}"</span>)
+
+<span class="cm"># Zero or negative trip distance</span>
+zero_dist = df.filter(pl.col(<span class="st">'trip_distance'</span>) &lt;= <span class="num">0</span>).height
+
+<span class="cm"># Unrealistic passenger counts</span>
+bad_pax = df.filter((pl.col(<span class="st">'passenger_count'</span>) > <span class="num">8</span>) |
+                    (pl.col(<span class="st">'passenger_count'</span>) == <span class="num">0</span>)).height
+
+<span class="cm"># Pickup after dropoff (time travel!)</span>
+if <span class="st">'tpep_dropoff_datetime'</span> in df.columns:
+    time_error = df.filter(
+        pl.col(<span class="st">'tpep_pickup_datetime'</span>) >= pl.col(<span class="st">'tpep_dropoff_datetime'</span>)
+    ).height
+    print(<span class="st">f"Pickup after dropoff: {time_error:,}"</span>)
+
+<span class="cm"># ── 3. Range validation ──</span>
+range_rules = {
+    <span class="st">'fare_amount'</span>: (<span class="num">0</span>, <span class="num">1000</span>),
+    <span class="st">'trip_distance'</span>: (<span class="num">0</span>, <span class="num">200</span>),
+    <span class="st">'passenger_count'</span>: (<span class="num">1</span>, <span class="num">8</span>),
+    <span class="st">'tip_amount'</span>: (<span class="num">0</span>, <span class="num">300</span>),
+}
+
+<span class="kw">for</span> col, (lo, hi) <span class="kw">in</span> range_rules.items():
+    <span class="kw">if</span> col <span class="kw">in</span> df.columns:
+        n = df.filter((pl.col(col) &lt; lo) | (pl.col(col) > hi)).height
+        <span class="fn">print</span>(<span class="st">f"{col} violations: {n:,} ({n/df.height*100:.2f}%)"</span>)
+
+<span class="cm"># ── 4. Zero-variance columns ──</span>
+zero_var = [c <span class="kw">for</span> c <span class="kw">in</span> df.columns
+            <span class="kw">if</span> df[c].dtype <span class="kw">in</span> (pl.Float64, pl.Int64) <span class="kw">and</span> df[c].n_unique() == <span class="num">1</span>]
+print(<span class="st">f"Zero variance cols: {zero_var}"</span>)  <span class="cm"># → drop these</span>
+
+<span class="cm"># ── 5. Generate clean dataset ──</span>
+df_clean = (df
+    .filter(
+        (pl.col(<span class="st">'fare_amount'</span>).is_between(<span class="num">0.5</span>, <span class="num">500</span>)) &
+        (pl.col(<span class="st">'trip_distance'</span>).is_between(<span class="num">0.01</span>, <span class="num">100</span>)) &
+        (pl.col(<span class="st">'passenger_count'</span>).is_between(<span class="num">1</span>, <span class="num">8</span>))
+    )
+    .drop_nulls(subset=[<span class="st">'fare_amount'</span>, <span class="st">'trip_distance'</span>])
+)
+<span class="fn">print</span>(<span class="st">f"After cleaning: {df_clean.height:,} rows ({df_clean.height/df.height*100:.1f}% retained)"</span>)</div>
+  </div>
+
+  <div class="alert alert-danger">
+    <div class="alert-icon">🚨</div>
+    <div class="alert-body"><strong>NYC Taxi quality issues found:</strong> ~8,000 rows with negative fare_amount (refunds or errors). ~200K rows with passenger_count=0. ~1,400 rows where pickup_datetime &gt; dropoff_datetime. ~15K rows with trip_distance=0 but fare_amount &gt; $5 (standing charges / app errors). Always document these decisions for your team.</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     12 — AUTOMATED PROFILING
+═════════════════════════════════════════════════ -->
+<section class="section" id="s12">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <div>
+      <div class="section-title">Automated Profiling</div>
+      <div class="section-desc">ydata-profiling generates a comprehensive HTML report in one line. Use as a starting point, then drill deeper with custom analysis for findings that matter.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">profiling.py</span></div>
+    <div class="code-body"><span class="kw">from</span> <span class="im">ydata_profiling</span> <span class="kw">import</span> ProfileReport
+
+<span class="cm"># ── Sample first for large datasets (>500K rows) ──</span>
+sample = df.sample(<span class="num">50_000</span>, seed=<span class="num">42</span>).to_pandas()
+
+<span class="cm"># ── Minimal mode: fast (for >1M rows) ──</span>
+profile_minimal = ProfileReport(
+    sample,
+    title=<span class="st">"NYC Taxi EDA — Minimal"</span>,
+    minimal=<span class="kw">True</span>
+)
+profile_minimal.to_file(<span class="st">"report_minimal.html"</span>)
+
+<span class="cm"># ── Full mode: comprehensive (for &lt;100K rows) ──</span>
+profile_full = ProfileReport(
+    sample,
+    title=<span class="st">"NYC Taxi EDA — Full"</span>,
+    minimal=<span class="kw">False</span>,
+    explorative=<span class="kw">True</span>,
+    correlations={
+        <span class="st">"pearson"</span>: {<span class="st">"calculate"</span>: <span class="kw">True</span>},
+        <span class="st">"spearman"</span>: {<span class="st">"calculate"</span>: <span class="kw">True</span>},
+        <span class="st">"kendall"</span>: {<span class="st">"calculate"</span>: <span class="kw">False</span>},   <span class="cm"># slow</span>
+        <span class="st">"phi_k"</span>: {<span class="st">"calculate"</span>: <span class="kw">True</span>},      <span class="cm"># mixed types</span>
+    },
+    missing_diagrams={<span class="st">"heatmap"</span>: <span class="kw">True</span>, <span class="st">"dendrogram"</span>: <span class="kw">True</span>},
+    interactions={<span class="st">"targets"</span>: [<span class="st">"fare_amount"</span>]}
+)
+profile_full.to_file(<span class="st">"report_full.html"</span>)
+
+<span class="cm"># ── Compare two datasets (drift detection) ──</span>
+profile_jan = ProfileReport(df_jan.to_pandas(), title=<span class="st">"January"</span>)
+profile_feb = ProfileReport(df_feb.to_pandas(), title=<span class="st">"February"</span>)
+comparison = profile_jan.compare(profile_feb)
+comparison.to_file(<span class="st">"drift_report.html"</span>)
+<span class="cm"># → Reveals distribution shift between time periods (data drift!)</span></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     13 — IMBALANCED DATA
+═════════════════════════════════════════════════ -->
+<section class="section" id="s13">
+  <div class="section-header">
+    <div class="section-num">13</div>
+    <div>
+      <div class="section-title">EDA for Imbalanced Datasets</div>
+      <div class="section-desc">Classification tasks with imbalanced targets require specialized EDA. A model predicting "not fraud" 99.9% of the time achieves 99.9% accuracy — but is useless.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">imbalanced.py</span></div>
+    <div class="code-body"><span class="cm"># Using Titanic dataset for classification example</span>
+titanic_url = <span class="st">"https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"</span>
+titanic = pl.from_pandas(pd.read_csv(titanic_url))
+
+<span class="cm"># ── Class distribution ──</span>
+class_dist = (titanic.group_by(<span class="st">'Survived'</span>)
+              .agg(pl.len().alias(<span class="st">'count'</span>))
+              .with_columns((pl.col(<span class="st">'count'</span>) / titanic.height * <span class="num">100</span>).round(<span class="num">1</span>).alias(<span class="st">'pct'</span>)))
+print(class_dist)
+<span class="cm"># Titanic: ~38% survived (1), 62% died (0) → mild imbalance</span>
+
+<span class="cm"># ── Imbalance ratio ──</span>
+majority = class_dist[<span class="st">'count'</span>].max()
+minority = class_dist[<span class="st">'count'</span>].min()
+ratio = majority / minority
+print(<span class="st">f"Imbalance ratio: {ratio:.1f}:1"</span>)
+<span class="cm"># &lt;3: mild | 3-10: moderate | >10: severe</span>
+
+<span class="cm"># ── Stratified feature analysis ──</span>
+<span class="kw">for</span> feat <span class="kw">in</span> [<span class="st">'Age'</span>, <span class="st">'Fare'</span>, <span class="st">'Pclass'</span>]:
+    stats_by_class = (titanic.group_by(<span class="st">'Survived'</span>)
+                      .agg([
+                          pl.col(feat).mean().alias(<span class="st">"mean"</span>),
+                          pl.col(feat).median().alias(<span class="st">"median"</span>),
+                          pl.col(feat).std().alias(<span class="st">"std"</span>),
+                      ]))
+    print(<span class="st">f"\n{feat} by Survived:\n"</span>, stats_by_class)
+
+<span class="cm"># ── Overlapping distributions: survivors vs non-survivors ──</span>
+fig = px.histogram(titanic.to_pandas(), x=<span class="st">'Age'</span>, color=<span class="st">'Survived'</span>,
+                    barmode=<span class="st">'overlay'</span>, opacity=<span class="num">0.6</span>,
+                    color_discrete_map={<span class="num">0</span>: <span class="st">'#e05252'</span>, <span class="num">1</span>: <span class="st">'#3ecf8e'</span>},
+                    title=<span class="st">"Age Distribution: Survived vs Not"</span>)
+
+<span class="cm"># ── Survival rates by feature bins ──</span>
+pdf_t = titanic.to_pandas()
+pdf_t[<span class="st">'age_bin'</span>] = pd.cut(pdf_t[<span class="st">'Age'</span>].fillna(<span class="num">28</span>),
+                             bins=[<span class="num">0</span>,<span class="num">10</span>,<span class="num">20</span>,<span class="num">30</span>,<span class="num">40</span>,<span class="num">60</span>,<span class="num">100</span>])
+survival_by_age = pdf_t.groupby(<span class="st">'age_bin'</span>, observed=<span class="kw">True</span>)[<span class="st">'Survived'</span>].mean()
+fig_sr = px.bar(survival_by_age.reset_index(), x=<span class="st">'age_bin'</span>, y=<span class="st">'Survived'</span>,
+                 title=<span class="st">"Survival Rate by Age Group"</span>,
+                 labels={<span class="st">'Survived'</span>: <span class="st">'Survival Rate'</span>})
+
+<span class="cm"># ── Mosaic plot equivalent ──</span>
+fig_mos = px.bar(pdf_t.groupby([<span class="st">'Pclass'</span>, <span class="st">'Sex'</span>])[<span class="st">'Survived'</span>].mean().reset_index(),
+                  x=<span class="st">'Pclass'</span>, y=<span class="st">'Survived'</span>, color=<span class="st">'Sex'</span>, barmode=<span class="st">'group'</span>,
+                  title=<span class="st">"Survival Rate: Class × Sex"</span>)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     14 — FULL PIPELINE
+═════════════════════════════════════════════════ -->
+<section class="section" id="s14">
+  <div class="section-header">
+    <div class="section-num">14</div>
+    <div>
+      <div class="section-title">The Full EDA Pipeline</div>
+      <div class="section-desc">A single orchestration function that runs all analyses on any new dataset. Parameterize with column names and target — everything else is automatic.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">PYTHON</span><span class="filename">full_pipeline.py</span></div>
+    <div class="code-body"><span class="kw">def</span> <span class="fn">run_eda</span>(df: pl.DataFrame,
+            target_col: str = <span class="kw">None</span>,
+            datetime_col: str = <span class="kw">None</span>,
+            lat_col: str = <span class="kw">None</span>,
+            lon_col: str = <span class="kw">None</span>,
+            output_dir: str = <span class="st">"eda_outputs"</span>,
+            sample_n: int = <span class="num">50_000</span>) -> dict:
+    <span class="st">"""
+    Run the complete EDA pipeline on any dataset.
+    Returns a dict of all figures and statistics.
+    """</span>
+    Path(output_dir).mkdir(exist_ok=<span class="kw">True</span>)
+    results = {}
+
+    <span class="cm"># ── Auto-detect column types ──</span>
+    num_cols = [c <span class="kw">for</span> c <span class="kw">in</span> df.columns
+                <span class="kw">if</span> df[c].dtype <span class="kw">in</span> (pl.Float32, pl.Float64, pl.Int32, pl.Int64)
+                <span class="kw">and</span> c not <span class="kw">in</span> [target_col]]
+    cat_cols = [c <span class="kw">for</span> c <span class="kw">in</span> df.columns
+                <span class="kw">if</span> df[c].dtype == pl.Utf8 <span class="kw">or</span> df[c].n_unique() &lt; <span class="num">30</span>]
+
+    <span class="cm"># 1. Schema + memory</span>
+    results[<span class="st">"schema"</span>] = {<span class="st">"rows"</span>: df.height, <span class="st">"cols"</span>: df.width,
+                          <span class="st">"memory_mb"</span>: df.estimated_size() / <span class="num">1024</span>**<span class="num">2</span>}
+    results[<span class="st">"cardinality"</span>] = BasicStats.cardinality_report(df)
+
+    <span class="cm"># 2. Missing values</span>
+    results[<span class="st">"missing"</span>] = MissingValueAnalysis.missing_summary(df)
+    fig_miss = MissingValueAnalysis.plotly_missing_bar(df)
+    <span class="kw">if</span> fig_miss:
+        fig_miss.write_html(<span class="st">f"{output_dir}/missing.html"</span>)
+
+    <span class="cm"># 3. Univariate</span>
+    fig_dist = UnivariateAnalysis.distribution_panel(df, num_cols[:<span class="num">9</span>])
+    fig_dist.write_html(<span class="st">f"{output_dir}/distributions.html"</span>)
+    results[<span class="st">"summaries"</span>] = {c: UnivariateAnalysis.five_number_summary(df, c)
+                             <span class="kw">for</span> c <span class="kw">in</span> num_cols[:<span class="num">10</span>]}
+
+    <span class="cm"># 4. Outliers</span>
+    results[<span class="st">"outliers"</span>] = OutlierDetection.outlier_summary_report(df, num_cols[:<span class="num">8</span>])
+
+    <span class="cm"># 5. Bivariate correlation</span>
+    <span class="kw">if</span> <span class="fn">len</span>(num_cols) >= <span class="num">2</span>:
+        fig_corr = BivariateAnalysis.correlation_matrix(df, num_cols[:<span class="num">12</span>], <span class="st">"spearman"</span>)
+        fig_corr.write_html(<span class="st">f"{output_dir}/correlation.html"</span>)
+
+    <span class="cm"># 6. Multivariate</span>
+    <span class="kw">if</span> <span class="fn">len</span>(num_cols) >= <span class="num">3</span>:
+        pca_res = MultivariateAnalysis.pca_analysis(df, num_cols[:<span class="num">10</span>])
+        pca_res[<span class="st">"fig_scree"</span>].write_html(<span class="st">f"{output_dir}/pca_scree.html"</span>)
+        pca_res[<span class="st">"fig_biplot"</span>].write_html(<span class="st">f"{output_dir}/pca_biplot.html"</span>)
+        results[<span class="st">"pca"</span>] = pca_res
+
+    <span class="cm"># 7. Time series (if datetime col)</span>
+    <span class="kw">if</span> datetime_col:
+        df = TimeSeriesEDA.temporal_features(df, datetime_col)
+        <span class="kw">if</span> num_cols:
+            fig_ts = TimeSeriesEDA.time_aggregation_plot(df, datetime_col, num_cols[<span class="num">0</span>])
+            fig_ts.write_html(<span class="st">f"{output_dir}/time_series.html"</span>)
+
+    <span class="cm"># 8. Target analysis</span>
+    <span class="kw">if</span> target_col <span class="kw">and</span> target_col <span class="kw">in</span> df.columns:
+        feat_cols = [c <span class="kw">for</span> c <span class="kw">in</span> num_cols <span class="kw">if</span> c != target_col]
+        mi_df, fig_mi = TargetAnalysis.mutual_information_scores(
+            df, feat_cols, target_col)
+        fig_mi.write_html(<span class="st">f"{output_dir}/mutual_info.html"</span>)
+        results[<span class="st">"feature_importance"</span>] = mi_df
+
+    <span class="cm"># 9. Data quality</span>
+    results[<span class="st">"quality"</span>] = DataQualityAudit.generate_full_report(df)
+
+    print(<span class="st">f"\n✓ EDA complete. {len(results)} analysis modules run."</span>)
+    print(<span class="st">f"  Outputs saved to: {output_dir}/"</span>)
+    <span class="kw">return</span> results
+
+
+<span class="cm"># ── Usage: ONE call for any new dataset ──</span>
+results = run_eda(
+    df,
+    target_col=<span class="st">'tip_pct'</span>,
+    datetime_col=<span class="st">'tpep_pickup_datetime'</span>,
+    output_dir=<span class="st">"nyc_taxi_eda"</span>
+)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     15 — CHECKLIST
+═════════════════════════════════════════════════ -->
+<section class="section" id="s15">
+  <div class="section-header">
+    <div class="section-num">15</div>
+    <div>
+      <div class="section-title">Industrial EDA Checklist</div>
+      <div class="section-desc">Print this and check off each item before calling EDA "complete." Every unchecked item is a potential blind spot in your analysis.</div>
+    </div>
+  </div>
+
+  <div class="mega-checklist">
+    <div class="check-group">
+      <h4>Ingestion & Shape</h4>
+      <ul>
+        <li><span class="cb"></span>Rows, columns, memory usage reported</li>
+        <li><span class="cb"></span>Schema reviewed (dtypes, column names)</li>
+        <li><span class="cb"></span>Sample rows inspected (head + tail)</li>
+        <li><span class="cb"></span>Cardinality of every column measured</li>
+        <li><span class="cb"></span>Semantic type detection run</li>
+        <li><span class="cb"></span>Lazy loading used for large files</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Data Quality</h4>
+      <ul>
+        <li><span class="cb"></span>Missing values: count, %, pattern</li>
+        <li><span class="cb"></span>MCAR/MAR/MNAR classification attempted</li>
+        <li><span class="cb"></span>Full and key-based duplicates checked</li>
+        <li><span class="cb"></span>Impossible values detected (negatives, future dates)</li>
+        <li><span class="cb"></span>Value range validation against domain rules</li>
+        <li><span class="cb"></span>Zero-variance columns identified</li>
+        <li><span class="cb"></span>String quality issues checked (whitespace, empty)</li>
+        <li><span class="cb"></span>Type mismatches checked (numbers stored as strings)</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Univariate Analysis</h4>
+      <ul>
+        <li><span class="cb"></span>Distribution histograms for all numeric cols</li>
+        <li><span class="cb"></span>Five-number summary + skew + kurtosis</li>
+        <li><span class="cb"></span>Normality tests (Shapiro / D'Agostino / KS)</li>
+        <li><span class="cb"></span>QQ plots for key numeric features</li>
+        <li><span class="cb"></span>Box / violin plots for spread visualization</li>
+        <li><span class="cb"></span>Frequency tables for all categoricals</li>
+        <li><span class="cb"></span>Pareto charts for high-cardinality categoricals</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Bivariate Analysis</h4>
+      <ul>
+        <li><span class="cb"></span>Pearson correlation matrix (numeric)</li>
+        <li><span class="cb"></span>Spearman correlation (non-normal / robust)</li>
+        <li><span class="cb"></span>Scatter / hexbin for dense pairs</li>
+        <li><span class="cb"></span>Group stats for all numeric × categorical pairs</li>
+        <li><span class="cb"></span>ANOVA / Kruskal-Wallis test with effect size</li>
+        <li><span class="cb"></span>Chi-square + Cramér's V for cat × cat</li>
+        <li><span class="cb"></span>Contingency heatmaps for key pairs</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Multivariate Analysis</h4>
+      <ul>
+        <li><span class="cb"></span>PCA: scree plot, loadings, biplot</li>
+        <li><span class="cb"></span>t-SNE or UMAP for cluster structure</li>
+        <li><span class="cb"></span>Parallel coordinates for multi-dim patterns</li>
+        <li><span class="cb"></span>VIF computed (multicollinearity check)</li>
+        <li><span class="cb"></span>Scatter plot matrix (SPLOM)</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Outlier Detection</h4>
+      <ul>
+        <li><span class="cb"></span>IQR fences computed for all numeric cols</li>
+        <li><span class="cb"></span>Z-score / Modified Z-score (MAD)</li>
+        <li><span class="cb"></span>Isolation Forest (multivariate)</li>
+        <li><span class="cb"></span>Each outlier investigated: error vs real?</li>
+        <li><span class="cb"></span>Outlier treatment decision documented</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Temporal (if datetimes exist)</h4>
+      <ul>
+        <li><span class="cb"></span>Temporal features extracted (hour, day, month)</li>
+        <li><span class="cb"></span>Time series plot with rolling stats</li>
+        <li><span class="cb"></span>Hour × day-of-week heatmap</li>
+        <li><span class="cb"></span>Seasonal decomposition (trend + seasonal + residual)</li>
+        <li><span class="cb"></span>ACF / PACF plots</li>
+        <li><span class="cb"></span>Data drift checked across time periods</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Target Analysis</h4>
+      <ul>
+        <li><span class="cb"></span>Class balance (classification) / target distribution</li>
+        <li><span class="cb"></span>Imbalance ratio computed</li>
+        <li><span class="cb"></span>Mutual information: all features vs target</li>
+        <li><span class="cb"></span>Random Forest permutation importance</li>
+        <li><span class="cb"></span>Target vs each feature plotted</li>
+        <li><span class="cb"></span>Point-biserial for binary features</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Documentation & Handoff</h4>
+      <ul>
+        <li><span class="cb"></span>Every anomaly noted with row count</li>
+        <li><span class="cb"></span>Data quality issues list created for team</li>
+        <li><span class="cb"></span>Feature engineering ideas logged</li>
+        <li><span class="cb"></span>Columns recommended for dropping</li>
+        <li><span class="cb"></span>Surprising findings highlighted</li>
+        <li><span class="cb"></span>EDA summary report written</li>
+        <li><span class="cb"></span>ydata-profiling HTML report generated</li>
+      </ul>
+    </div>
+
+    <div class="check-group">
+      <h4>Geospatial (if lat/lon exist)</h4>
+      <ul>
+        <li><span class="cb"></span>Coordinate validity checked (within bounds)</li>
+        <li><span class="cb"></span>Density heatmap generated</li>
+        <li><span class="cb"></span>Scatter map with key metric as color</li>
+        <li><span class="cb"></span>Centroid and spatial spread computed</li>
+        <li><span class="cb"></span>Zone-level aggregations analyzed</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert alert-success">
+    <div class="alert-icon">✅</div>
+    <div class="alert-body"><strong>EDA is iterative, not linear.</strong> Start with automated profiling to find the most interesting leads. Then drill deep on those. Each finding suggests new questions. You're done when you can explain the dataset's key characteristics, quirks, and predictive signals to a colleague without referring to your notes.</div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<div class="footer">
+  <div>
+    <p>Exhaustive EDA Guidebook for ML Engineers</p>
+    <p style="margin-top:4px;">Dataset: <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page" style="color:var(--accent);text-decoration:none">NYC TLC Yellow Taxi 2023</a> · Python file: <code style="font-family:var(--font-code);font-size:12px;color:var(--teal)">EDA_Guidebook_ML_Engineers.py</code></p>
+  </div>
+  <div class="footer-badge">40+ methods · polars + plotly · production-grade</div>
+</div>
+
+</main>
+</div>
+
+<script>
+  // Sidebar active state on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const navLinks = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
